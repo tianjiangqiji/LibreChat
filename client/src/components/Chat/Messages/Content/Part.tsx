@@ -250,6 +250,13 @@ const Part = memo(function Part({
         height={imageFile.height}
       />
     );
+  } else if (part.type === ContentTypes.IMAGE_URL) {
+    const imageUrl = part[ContentTypes.IMAGE_URL];
+    const url = typeof imageUrl === 'string' ? imageUrl : imageUrl?.url;
+    if (!url) {
+      return null;
+    }
+    return <Image imagePath={url} altText="Generated Image" />;
   }
 
   return null;

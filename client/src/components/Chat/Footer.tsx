@@ -27,9 +27,9 @@ function Footer({ className }: { className?: string }) {
   const mainContentParts = (
     typeof config?.customFooter === 'string'
       ? config.customFooter
-      : '[LibreChat ' +
+      : '[CCODE WEB ' +
         Constants.VERSION +
-        '](https://librechat.ai) - ' +
+        '](https://ccode.vip) - ' +
         localize('com_ui_latest_footer')
   ).split('|');
 

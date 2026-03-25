@@ -96,6 +96,43 @@ function isInCodeBlock(position: number, codeRegions: Array<[number, number]>): 
 }
 
 /**
+ * Extracts and protects base64 data URLs from content, returning placeholders and a restoration function.
+ * This prevents LaTeX preprocessing from interfering with base64 image data.
+ * @param content The input string that may contain base64 data URLs
+ * @returns Object with protected content, placeholders map, and restoration function
+ */
+function protectBase64DataUrls(
+  content: string,
+): { protectedContent: string; placeholders: Map<string, string> } {
+  const placeholders = new Map<string, string>();
+  // Match markdown image syntax with base64 data URLs: ![alt](data:...)
+  // Use a more robust regex that handles base64 data which may contain various characters
+  const base64ImageRegex = /!\[([^\]]*)\]\((data:image\/[^;]+;base64,[A-Za-z0-9+/=]+)\)/g;
+  let index = 0;
+  const protectedContent = content.replace(base64ImageRegex, (match, alt, dataUrl) => {
+    const placeholder = `__BASE64_IMAGE_PLACEHOLDER_${index}__`;
+    placeholders.set(placeholder, `![${alt}](${dataUrl})`);
+    index++;
+    return placeholder;
+  });
+  return { protectedContent, placeholders };
+}
+
+/**
+ * Restores base64 data URLs from placeholders.
+ * @param content The content with placeholders
+ * @param placeholders The map of placeholders to original content
+ * @returns The content with restored base64 data URLs
+ */
+function restoreBase64DataUrls(content: string, placeholders: Map<string, string>): string {
+  let result = content;
+  for (const [placeholder, original] of placeholders) {
+    result = result.replace(placeholder, original);
+  }
+  return result;
+}
+
+/**
  * Preprocesses LaTeX content by escaping currency indicators and converting single dollar math delimiters.
  * Optimized for high-frequency execution.
  * @param content The input string containing LaTeX expressions.
@@ -105,6 +142,25 @@ export function preprocessLaTeX(content: string): string {
   // Early return for most common case
   if (!content.includes('$')) return content;
 
+  // Protect base64 data URLs from LaTeX preprocessing
+  const { protectedContent, placeholders } = protectBase64DataUrls(content);
+
+  // If no placeholders were created, process normally
+  if (placeholders.size === 0) {
+    return processLaTeXInternal(content);
+  }
+
+  // Process the protected content, then restore base64 data URLs
+  const processed = processLaTeXInternal(protectedContent);
+  return restoreBase64DataUrls(processed, placeholders);
+}
+
+/**
+ * Internal function to process LaTeX without base64 protection.
+ * @param content The input string containing LaTeX expressions.
+ * @returns The processed string.
+ */
+function processLaTeXInternal(content: string): string {
   // Process mhchem first (usually rare, so check if needed)
   let processed = content;
   if (content.includes('\\ce{') || content.includes('\\pu{')) {

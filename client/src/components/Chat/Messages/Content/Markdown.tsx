@@ -4,9 +4,9 @@ import remarkMath from 'remark-math';
 import supersub from 'remark-supersub';
 import rehypeKatex from 'rehype-katex';
 import { useRecoilValue } from 'recoil';
-import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import remarkDirective from 'remark-directive';
+import ReactMarkdown from 'react-markdown';
 import type { Pluggable } from 'unified';
 import { Citation, CompositeCitation, HighlightedText } from '~/components/Web/Citation';
 import {
@@ -20,6 +20,7 @@ import MarkdownErrorBoundary from './MarkdownErrorBoundary';
 import { langSubset, preprocessLaTeX } from '~/utils';
 import { unicodeCitation } from '~/components/Web';
 import { code, a, p, img } from './MarkdownComponents';
+import { markdownUrlTransform } from './markdownUrlTransform';
 import store from '~/store';
 
 type TContentProps = {
@@ -82,6 +83,7 @@ const Markdown = memo(function Markdown({ content = '', isLatestMessage }: TCont
             remarkPlugins={remarkPlugins}
             /* @ts-ignore */
             rehypePlugins={rehypePlugins}
+            urlTransform={markdownUrlTransform}
             components={
               {
                 code,

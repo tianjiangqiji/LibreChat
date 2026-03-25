@@ -167,12 +167,10 @@ export default function useStepHandler({
 
       updatedContent[index] = update;
     } else if (contentType === ContentTypes.IMAGE_URL && 'image_url' in contentPart) {
-      const currentContent = updatedContent[index] as {
-        type: ContentTypes.IMAGE_URL;
-        image_url: string;
-      };
+      const imageContentPart = contentPart as Agents.MessageContentImageUrl;
       updatedContent[index] = {
-        ...currentContent,
+        type: ContentTypes.IMAGE_URL,
+        image_url: imageContentPart.image_url,
       };
     } else if (contentType === ContentTypes.SUMMARY) {
       const currentSummary = updatedContent[index] as SummaryContentPart | undefined;

@@ -8,6 +8,7 @@ const {
   decrementPendingRequest,
   sanitizeMessageForTransmit,
   checkAndIncrementPendingRequest,
+  processContentForBase64Images,
 } = require('@librechat/api');
 const { disposeClient, clientRegistry, requestDataMap } = require('~/server/cleanup');
 const { handleAbortError } = require('~/server/middleware');
@@ -249,6 +250,18 @@ const ResumableAgentController = async (req, res, next, initializeClient, addTit
         const messageId = response.messageId;
         const endpoint = endpointOption.endpoint;
         response.endpoint = endpoint;
+
+        // Process content to extract base64 images from markdown text
+        // This converts markdown image syntax ![alt](data:image/...) to structured image_url content
+        if (response.content) {
+          response.content = processContentForBase64Images(response.content);
+        } else if (response.text) {
+          // If only text field exists, process it and update content
+          const processedContent = processContentForBase64Images(response.text);
+          if (processedContent.length > 1 || processedContent[0]?.type === 'image_url') {
+            response.content = processedContent;
+          }
+        }
 
         const databasePromise = response.databasePromise;
         delete response.databasePromise;
@@ -637,6 +650,18 @@ const _LegacyAgentController = async (req, res, next, initializeClient, addTitle
     const messageId = response.messageId;
     const endpoint = endpointOption.endpoint;
     response.endpoint = endpoint;
+
+    // Process content to extract base64 images from markdown text
+    // This converts markdown image syntax ![alt](data:image/...) to structured image_url content
+    if (response.content) {
+      response.content = processContentForBase64Images(response.content);
+    } else if (response.text) {
+      // If only text field exists, process it and update content
+      const processedContent = processContentForBase64Images(response.text);
+      if (processedContent.length > 1 || processedContent[0]?.type === 'image_url') {
+        response.content = processedContent;
+      }
+    }
 
     // Store database promise locally
     const databasePromise = response.databasePromise;

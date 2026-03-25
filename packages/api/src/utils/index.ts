@@ -6,6 +6,7 @@ export * from './content';
 export * from './email';
 export * from './env';
 export * from './events';
+export * from './extract-base64-images';
 export * from './files';
 export * from './import';
 export * from './generators';

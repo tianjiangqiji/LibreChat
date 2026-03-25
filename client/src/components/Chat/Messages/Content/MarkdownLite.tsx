@@ -9,6 +9,7 @@ import type { PluggableList } from 'unified';
 import { code, codeNoExecution, a, p, img } from './MarkdownComponents';
 import { CodeBlockProvider, ArtifactProvider } from '~/Providers';
 import MarkdownErrorBoundary from './MarkdownErrorBoundary';
+import { markdownUrlTransform } from './markdownUrlTransform';
 import { langSubset } from '~/utils';
 
 const MarkdownLite = memo(
@@ -38,6 +39,7 @@ const MarkdownLite = memo(
               ]}
               /** @ts-ignore */
               rehypePlugins={rehypePlugins}
+              urlTransform={markdownUrlTransform}
               components={
                 {
                   code: codeExecution ? code : codeNoExecution,

@@ -4,9 +4,10 @@ import supersub from 'remark-supersub';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import type { PluggableList } from 'unified';
-import { code, codeNoExecution, a, p } from './MarkdownComponents';
+import { code, codeNoExecution, a, p, img } from './MarkdownComponents';
 import { CodeBlockProvider } from '~/Providers';
 import { langSubset } from '~/utils';
+import { markdownUrlTransform } from './markdownUrlTransform';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -67,11 +68,13 @@ class MarkdownErrorBoundary extends React.Component<
             ]}
             /** @ts-ignore */
             rehypePlugins={rehypePlugins}
+            urlTransform={markdownUrlTransform}
             components={
               {
                 code: codeExecution ? code : codeNoExecution,
                 a,
                 p,
+                img,
               } as {
                 [nodeType: string]: React.ElementType;
               }

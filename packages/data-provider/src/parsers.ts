@@ -196,6 +196,27 @@ const extractOmniVersion = (modelStr: string): string => {
   return '';
 };
 
+/**
+ * Format model ID to a human-readable display name.
+ * Converts hyphens and underscores to spaces, capitalizes first letter of each word.
+ * Examples:
+ * - "gpt-5.4-mini" -> "Gpt 5.4 Mini"
+ * - "glm-5" -> "Glm 5"
+ * - "claude-3-sonnet" -> "Claude 3 Sonnet"
+ */
+const formatModelDisplayName = (modelStr: string): string => {
+  if (!modelStr) {
+    return '';
+  }
+  // Replace hyphens and underscores with spaces
+  const spaced = modelStr.replace(/[-_]/g, ' ');
+  // Capitalize first letter of each word
+  return spaced
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
 export const getResponseSender = (endpointOption: Partial<t.TEndpointOption>): string => {
   const {
     model: _m,
@@ -278,7 +299,8 @@ export const getResponseSender = (endpointOption: Partial<t.TEndpointOption>): s
       return modelDisplayLabel;
     }
 
-    return 'AI';
+    // Format model ID as human-readable name (e.g., "gpt-5.4-mini" -> "Gpt 5.4 Mini")
+    return formatModelDisplayName(model) || 'AI';
   }
 
   return '';
